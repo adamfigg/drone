@@ -5,11 +5,24 @@ const commandDelays = require('./commandDelays');
 const PORT = 8889;
 const HOST = '192.168.10.1';
 
+function parseState(state) {
+	return state.split(';').map(x => x.split(':'));
+}
+
 const drone = dgram.createSocket('udp4');
 drone.bind(PORT);
 
+const droneState = dgram.createSocket('udp4');
+droneState.bind(8890);
+
 drone.on('message', message => {
 	console.log(`masterChief : ${message}`);
+});
+
+droneState.on('message', state => {
+	console.log(state.toString());
+	const formattedState = parseState(state.toString());
+	console.log(formattedState);
 });
 
 function handleError(err) {
@@ -19,10 +32,15 @@ function handleError(err) {
 	}
 }
 
-drone.send('command?', 0, 7, PORT, HOST, handleError);
-drone.send('battery?', 0, 8, PORT, HOST, handleError);
+// drone.send('command', 0, 7, PORT, HOST, handleError);
+// drone.send('battery?', 0, 8, PORT, HOST, handleError);
+// drone.send('flip', 0, 4, PORT, HOST, handleError);
+// drone.send('land', 0, 4, PORT, HOST, handleError);
+// drone.send('battery', 0, 7, PORT, HOST, handleError);
 
-const commands = ['command', 'battery?', 'takeoff', 'land'];
+
+const commands = ['command', 'battery?'];
+// const commands = ['command', 'battery?', 'takeoff', 'forward', 'back', 'land'];
 
 let i = 0;
 
